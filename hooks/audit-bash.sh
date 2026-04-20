@@ -100,5 +100,35 @@ contains_regex "$command" "bash -i.*>&.*/dev/tcp" && block_command "reverse shel
 contains_regex "$command" "curl.*\|.*(sh|bash)" && block_command "curl pipe to shell"
 contains_regex "$command" "wget.*\|.*(sh|bash)" && block_command "wget pipe to shell"
 
+# ============================================
+# LLM CLIENT CONFIG PROTECTION (added 2026-04-20)
+# ============================================
+# Block rm of critical Claude Code / Cursor / Windsurf config files.
+# Prevents accidental wipes by agents — on 2026-04-18 an agent ran
+# `rm ~/.claude/mcp.json ~/.cursor/mcp.json ~/.codeium/.../mcp_config.json`
+# across three clients, including deleting memboot's auto-backup, losing
+# 5 MCP server definitions silently. Recovery required manually reconstructing
+# the file from prior session transcripts.
+
+for _cfg_pat in \
+    '/\.claude/mcp\.json' \
+    '/\.claude/\.mcp\.json' \
+    '/\.claude/settings\.json' \
+    '/\.claude/settings\.local\.json' \
+    '/\.claude/keybindings\.json' \
+    '/\.claude/CLAUDE\.md' \
+    '/\.cursor/mcp\.json' \
+    '/\.codeium/[^[:space:]]+/mcp_config\.json'
+do
+    if echo "$command" | grep -qiE "(^|[[:space:]]|/)rm[[:space:]]+.*${_cfg_pat}([[:space:]]|$|;|&|\|)" 2>/dev/null; then
+        block_command "rm of protected LLM client config (${_cfg_pat})"
+    fi
+done
+
+# Block rm of .env / .env.<name> files
+if echo "$command" | grep -qiE "(^|[[:space:]]|/)rm[[:space:]]+.*/\.env(\.[a-z_]+)?([[:space:]]|$|;|&|\|)" 2>/dev/null; then
+    block_command "rm of .env file"
+fi
+
 # Allow the command
 exit 0
