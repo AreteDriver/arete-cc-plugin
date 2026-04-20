@@ -130,5 +130,64 @@ if echo "$command" | grep -qiE "(^|[[:space:]]|/)rm[[:space:]]+.*/\.env(\.[a-z_]
     block_command "rm of .env file"
 fi
 
+# ============================================
+# PARANOID EXTENSIONS (added 2026-04-20)
+# ============================================
+# Catches agent workarounds that bypass plain rm:
+#   - find ... -delete on protected trees
+#   - mv <protected> ... (equivalent blast radius to rm)
+#   - output redirection (> or >>) clobbering protected config files
+
+# find -delete rooted at a whole protected dir (blocks wipes of the tree).
+# Subdir targets like find ~/.claude/logs -delete are allowed — legit cleanup.
+# Path may be absolute (/home/user/.claude) or tilde-relative (~/.claude).
+if echo "$command" | grep -qiE "find[[:space:]]+[^[:space:]]*\.(claude|cursor|codeium|config)[[:space:]]+.*-delete" 2>/dev/null; then
+    block_command "find -delete on whole LLM client config tree"
+fi
+# find -delete with -name matching critical config filenames (any path).
+if echo "$command" | grep -qiE "find[[:space:]].*-name[[:space:]]+[\"']?(mcp|settings|keybindings|\.mcp|mcp_config|CLAUDE)[^[:space:]]*\.(json|md)[\"']?.*-delete" 2>/dev/null; then
+    block_command "find -delete targeting critical config filename"
+fi
+
+# mv of protected config files (same filenames as rm protection)
+for _cfg_pat in \
+    '/\.claude/mcp\.json' \
+    '/\.claude/\.mcp\.json' \
+    '/\.claude/settings\.json' \
+    '/\.claude/settings\.local\.json' \
+    '/\.claude/keybindings\.json' \
+    '/\.claude/CLAUDE\.md' \
+    '/\.cursor/mcp\.json' \
+    '/\.codeium/[^[:space:]]+/mcp_config\.json'
+do
+    if echo "$command" | grep -qiE "(^|[[:space:]]|/)mv[[:space:]]+.*${_cfg_pat}([[:space:]]|$|;|&|\|)" 2>/dev/null; then
+        block_command "mv of protected LLM client config (${_cfg_pat})"
+    fi
+done
+if echo "$command" | grep -qiE "(^|[[:space:]]|/)mv[[:space:]]+.*/\.env(\.[a-z_]+)?([[:space:]]|$|;|&|\|)" 2>/dev/null; then
+    block_command "mv of .env file"
+fi
+
+# Output redirection clobbering critical config files.
+# Any > or >> targeting these paths is almost certainly an agent
+# trying to reset state via shell rather than Edit tool. Block.
+for _cfg_pat in \
+    '/\.claude/mcp\.json' \
+    '/\.claude/\.mcp\.json' \
+    '/\.claude/settings\.json' \
+    '/\.claude/settings\.local\.json' \
+    '/\.claude/keybindings\.json' \
+    '/\.claude/CLAUDE\.md' \
+    '/\.cursor/mcp\.json' \
+    '/\.codeium/[^[:space:]]+/mcp_config\.json'
+do
+    if echo "$command" | grep -qiE ">[[:space:]]*[^[:space:]]*${_cfg_pat}([[:space:]]|$|;|&|\|)" 2>/dev/null; then
+        block_command "shell-redirect clobber of protected config (${_cfg_pat})"
+    fi
+done
+if echo "$command" | grep -qiE ">[[:space:]]*[^[:space:]]*/\.env(\.[a-z_]+)?([[:space:]]|$|;|&|\|)" 2>/dev/null; then
+    block_command "shell-redirect clobber of .env file"
+fi
+
 # Allow the command
 exit 0
