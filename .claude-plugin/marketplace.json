@@ -1,0 +1,15 @@
+{
+  "name": "arete-cc-stack",
+  "owner": {
+    "name": "ARETE (AreteDriver)",
+    "url": "https://github.com/AreteDriver"
+  },
+  "plugins": [
+    {
+      "name": "arete-cc-stack",
+      "source": "./",
+      "description": "ARETE's Claude Code automation stack — 8 security/audit hooks, 6 fleet-management slash commands, 3 domain subagents, swing-shift-aware statusline, and a global permission allowlist for a 30+ project portfolio.",
+      "version": "0.1.0"
+    }
+  ]
+}
