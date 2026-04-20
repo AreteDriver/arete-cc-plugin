@@ -1,0 +1,92 @@
+{
+  "name": "arete-cc-stack",
+  "version": "0.1.0",
+  "description": "ARETE's Claude Code automation stack — 8 security/audit hooks, 6 fleet-management slash commands, 3 domain subagents, a custom statusline, and a global permission allowlist optimized for a 30+ project portfolio.",
+  "author": "ARETE (AreteDriver)",
+  "license": "MIT",
+  "repository": "https://github.com/AreteDriver/arete-cc-plugin",
+  "keywords": ["automation", "security", "fleet-management", "tiaid", "eve-frontier", "arete"],
+  "claude_code_version": ">=2.1.0",
+
+  "commands": [
+    "commands/fleet-status.md",
+    "commands/tiaid-check.md",
+    "commands/hackathon-triage.md",
+    "commands/animus-sync.md",
+    "commands/wrap.md",
+    "commands/doctor.md"
+  ],
+
+  "agents": [
+    "agents/fleet-auditor.md",
+    "agents/eve-frontier-researcher.md",
+    "agents/tiaid-content-analyst.md"
+  ],
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/audit-bash.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/no-force-push.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/detect-secrets.py" }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/protected-paths.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/validate-files.py" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/detect-secrets.py" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tool-logger.sh" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-logger.sh" }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-logger.sh" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/detect-secrets.py" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/wrap-it-up.sh" }
+        ]
+      }
+    ]
+  },
+
+  "statusLine": {
+    "type": "command",
+    "command": "${CLAUDE_PLUGIN_ROOT}/bin/statusline.sh"
+  },
+
+  "permissions": {
+    "allow": [
+      "Bash(ruff check *)",
+      "Bash(anchormd audit *)",
+      "Bash(flyctl logs *)",
+      "Bash(flyctl status *)",
+      "Bash(npm audit *)",
+      "Bash(npm ls *)"
+    ]
+  }
+}
