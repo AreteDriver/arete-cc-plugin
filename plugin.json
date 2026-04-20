@@ -2,26 +2,14 @@
   "name": "arete-cc-stack",
   "version": "0.1.0",
   "description": "ARETE's Claude Code automation stack — 8 security/audit hooks, 6 fleet-management slash commands, 3 domain subagents, a custom statusline, and a global permission allowlist optimized for a 30+ project portfolio.",
-  "author": "ARETE (AreteDriver)",
+  "author": {
+    "name": "ARETE (AreteDriver)",
+    "url": "https://github.com/AreteDriver"
+  },
   "license": "MIT",
   "repository": "https://github.com/AreteDriver/arete-cc-plugin",
   "keywords": ["automation", "security", "fleet-management", "tiaid", "eve-frontier", "arete"],
   "claude_code_version": ">=2.1.0",
-
-  "commands": [
-    "commands/fleet-status.md",
-    "commands/tiaid-check.md",
-    "commands/hackathon-triage.md",
-    "commands/animus-sync.md",
-    "commands/wrap.md",
-    "commands/doctor.md"
-  ],
-
-  "agents": [
-    "agents/fleet-auditor.md",
-    "agents/eve-frontier-researcher.md",
-    "agents/tiaid-content-analyst.md"
-  ],
 
   "hooks": {
     "PreToolUse": [
