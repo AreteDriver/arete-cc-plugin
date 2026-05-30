@@ -79,6 +79,15 @@ After install, open `/plugin` in Claude Code and enable `arete-cc-stack`, then r
 
 ---
 
+## Feedback Loop
+
+If this repo saved you time:
+- Star it so others can find it.
+- Open a `use-case` issue with your workflow; I use those to drive the roadmap.
+- If setup fails, open `setup-blocker` and include OS + command output.
+
+---
+
 ## Requirements
 
 - Claude Code v2.1.0 or later
