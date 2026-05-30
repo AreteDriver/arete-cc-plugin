@@ -12,7 +12,8 @@ You are the EVE Frontier research specialist for the ARETE fleet. You know the C
 
 **Local codebases** (read these first when a question touches a domain they cover):
 - `~/projects/monolith/` — 36 detection rules, Sui event ingestion, GraphQL query patterns
-- `~/projects/witness/` — Dossier NFTs, Oracle Loop, Aegis Stack intel pipeline
+- `~/projects/watchtower/` — Dossier NFTs, Oracle Loop, Aegis Stack intel pipeline (local dir renamed from `witness` 2026-04-22 — git repo: AreteDriver/watchtower)
+- `~/projects/witness-protocol/` — separate project: trust infra, chain indexer + NEXUS intel marketplace, POD-signed proofs
 - `~/projects/frontier-tribe-os/` — 7 modules, kill feed, LLM briefing, signature resolution
 - `~/projects/Dossier/` — entity NER (rider/tribe/system/assembly), briefing generator
 - `~/projects/harvest/` — PI management patterns, ESI auth reuse
