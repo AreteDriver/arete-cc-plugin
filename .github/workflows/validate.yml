@@ -1,0 +1,127 @@
+name: Validate Plugin
+
+# Guards the plugin manifest + hook wiring so a bad layout can't ship.
+# Catches the "hooks don't register" class of breakage: invalid JSON,
+# missing required manifest keys, hook commands pointing at files that
+# don't exist, and broken script syntax.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON manifests
+        run: |
+          python3 - <<'PY'
+          import json, sys, pathlib
+          root = pathlib.Path('.')
+          errors = []
+          required = {
+              '.claude-plugin/plugin.json': ['name', 'version'],
+              '.claude-plugin/marketplace.json': ['name', 'plugins'],
+              'hooks/hooks.json': ['hooks'],
+          }
+          for rel, keys in required.items():
+              p = root / rel
+              if not p.is_file():
+                  errors.append(f"missing manifest: {rel}")
+                  continue
+              try:
+                  data = json.loads(p.read_text())
+              except json.JSONDecodeError as e:
+                  errors.append(f"{rel}: invalid JSON: {e}")
+                  continue
+              for k in keys:
+                  if k not in data:
+                      errors.append(f"{rel}: missing required key '{k}'")
+          # Every other JSON file must at least parse.
+          for p in root.rglob('*.json'):
+              if '.git' in p.parts:
+                  continue
+              try:
+                  json.loads(p.read_text())
+              except json.JSONDecodeError as e:
+                  errors.append(f"{p}: invalid JSON: {e}")
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}")
+              sys.exit(1)
+          print("All JSON manifests valid.")
+          PY
+
+      - name: Check referenced scripts resolve
+        run: |
+          python3 - <<'PY'
+          import json, re, sys, pathlib
+          root = pathlib.Path('.').resolve()
+          ref_re = re.compile(r'\$\{CLAUDE_PLUGIN_ROOT\}/([^\s"\']+)')
+          refs = []
+
+          def walk(obj):
+              if isinstance(obj, dict):
+                  if obj.get('type') == 'command' and 'command' in obj:
+                      refs.append(obj['command'])
+                  for v in obj.values():
+                      walk(v)
+              elif isinstance(obj, list):
+                  for v in obj:
+                      walk(v)
+
+          walk(json.loads((root / 'hooks/hooks.json').read_text()))
+          plugin = json.loads((root / '.claude-plugin/plugin.json').read_text())
+          refs.append(plugin.get('statusLine', {}).get('command', ''))
+
+          missing = []
+          for cmd in refs:
+              for rel in ref_re.findall(cmd):
+                  if not (root / rel).is_file():
+                      missing.append(rel)
+          if missing:
+              for m in sorted(set(missing)):
+                  print(f"::error::referenced file not found: {m}")
+              sys.exit(1)
+          print(f"All {len(refs)} referenced scripts exist.")
+          PY
+
+      - name: Syntax-check hook + bin scripts
+        run: |
+          rc=0
+          for f in $(find hooks bin -name '*.sh' 2>/dev/null); do
+            if bash -n "$f"; then echo "ok (bash -n): $f"; else echo "::error file=$f::bash syntax error"; rc=1; fi
+          done
+          for f in $(find hooks -name '*.py' 2>/dev/null); do
+            if python3 -m py_compile "$f"; then echo "ok (py_compile): $f"; else echo "::error file=$f::python syntax error"; rc=1; fi
+          done
+          exit $rc
+
+      - name: Validate command/agent frontmatter
+        run: |
+          python3 - <<'PY'
+          import sys, pathlib
+          root = pathlib.Path('.')
+          errors = []
+          for d in ('commands', 'agents'):
+              for p in sorted((root / d).glob('*.md')):
+                  if not p.read_text().startswith('---'):
+                      errors.append(f"{p}: missing YAML frontmatter")
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}")
+              sys.exit(1)
+          print("All command/agent files have frontmatter.")
+          PY
