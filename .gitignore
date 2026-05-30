@@ -7,3 +7,6 @@ __pycache__/
 *.bak
 .env
 .env.*
+
+# Local Claude Code overrides (never commit — may disable guards)
+.claude/settings.local.json
