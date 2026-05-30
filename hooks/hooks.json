@@ -1,5 +1,5 @@
 {
-  "description": "ARETE security & audit hooks — bash auditing, secret detection, protected-path guards, tool logging, session boundaries.",
+  "description": "ARETE security & audit hooks — bash auditing, secret detection, protected-path guards, tool logging, session boundaries, and TDD commit gating.",
   "hooks": {
     "PreToolUse": [
       {
@@ -7,6 +7,7 @@
         "hooks": [
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/audit-bash.sh\"" },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-force-push.sh\"" },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/tdd-guard.sh\"" },
           { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/detect-secrets.py\"" }
         ]
       },
@@ -24,6 +25,12 @@
         "matcher": "*",
         "hooks": [
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/tool-logger.sh\"" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/test-marker.sh\"" }
         ]
       }
     ],
