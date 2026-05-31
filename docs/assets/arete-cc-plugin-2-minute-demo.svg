@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420">
+  <rect width="1280" height="420" fill="#0d1321"/>
+  <rect x="16" y="16" width="1248" height="388" rx="12" fill="#141b2d" stroke="#2f3a63"/>
+  <text x="34" y="52" fill="#93c5fd" font-family="Menlo, Consolas, monospace" font-size="22">arete-cc-plugin 2-minute demo</text>
+  <text x="34" y="92" fill="#a7f3d0" font-family="Menlo, Consolas, monospace" font-size="19">$ jq -r '.name + " v" + .version' .claude-plugin/plugin.json</text>
+  <text x="34" y="126" fill="#e5e7eb" font-family="Menlo, Consolas, monospace" font-size="18">arete-cc-stack v0.2.0</text>
+  <text x="34" y="176" fill="#a7f3d0" font-family="Menlo, Consolas, monospace" font-size="19">$ find hooks -maxdepth 1 -type f | wc -l</text>
+  <text x="34" y="210" fill="#e5e7eb" font-family="Menlo, Consolas, monospace" font-size="18">11</text>
+  <text x="34" y="260" fill="#a7f3d0" font-family="Menlo, Consolas, monospace" font-size="19">$ ls commands | wc -l</text>
+  <text x="34" y="294" fill="#e5e7eb" font-family="Menlo, Consolas, monospace" font-size="18">6</text>
+  <text x="34" y="332" fill="#94a3b8" font-family="Menlo, Consolas, monospace" font-size="16">Expected result: plugin metadata, hooks, and command pack verified before enabling in Claude Code.</text>
+</svg>

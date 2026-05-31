@@ -79,6 +79,27 @@ After install, open `/plugin` in Claude Code and enable `arete-cc-stack`, then r
 
 ---
 
+## 2-Minute Demo
+
+```bash
+# from repo root
+jq -r '.name + " v" + .version' .claude-plugin/plugin.json
+find hooks -maxdepth 1 -type f | wc -l
+ls commands | wc -l
+```
+
+Expected output:
+
+```text
+arete-cc-stack v0.2.0
+11
+6
+```
+
+![arete-cc-plugin 2-minute terminal demo](docs/assets/arete-cc-plugin-2-minute-demo.svg)
+
+---
+
 ## Feedback Loop
 
 If this repo saved you time:
