@@ -21,10 +21,6 @@ touch .tdd-guard          # at the repo root — now commits require a passing t
 export TDD_GUARD_OFF=1    # hard override, anywhere
 ```
 
-> The gitignored `.claude/settings.local.json` (`TDD_GUARD_OFF=1`) left over from
-> the pre-opt-in era is now redundant — harmless to keep (it's a hard override) or
-> delete.
-
 > **Hook self-reference gotcha:** `audit-bash.sh` and `tdd-guard.sh` scan the
 > **command string**, so a command whose *text* contains a real dangerous pattern
 > (e.g. `… | sh`) or the literal `git commit` can trip the live (installed) hook
