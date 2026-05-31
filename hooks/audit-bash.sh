@@ -96,9 +96,12 @@ contains_regex "$command" "mkfs\.[a-z]+ /dev/sd" && block_command "mkfs on disk"
 # Reverse shells
 contains_regex "$command" "bash -i.*>&.*/dev/tcp" && block_command "reverse shell"
 
-# Dangerous curl/wget piped to shell
-contains_regex "$command" "curl.*\|.*(sh|bash)" && block_command "curl pipe to shell"
-contains_regex "$command" "wget.*\|.*(sh|bash)" && block_command "wget pipe to shell"
+# Dangerous curl/wget piped to shell.
+# Match the pipe + shell-command pattern tightly: `| sh`, `| bash`, `|bash -c ...`
+# etc. — sh/bash must appear as a command token directly after the pipe, not as a
+# substring of a later word (e.g. avoids false-positives on `curl ... | grep dashboard`).
+contains_regex "$command" "curl([[:space:]]|$).*\|[[:space:]]*(sh|bash)([[:space:]]|;|&|\||$)" && block_command "curl pipe to shell"
+contains_regex "$command" "wget([[:space:]]|$).*\|[[:space:]]*(sh|bash)([[:space:]]|;|&|\||$)" && block_command "wget pipe to shell"
 
 # ============================================
 # LLM CLIENT CONFIG PROTECTION (added 2026-04-20)
