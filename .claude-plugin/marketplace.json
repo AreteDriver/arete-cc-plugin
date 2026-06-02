@@ -8,8 +8,8 @@
     {
       "name": "arete-cc-stack",
       "source": "./",
-      "description": "ARETE's Claude Code automation stack — 10 security/audit hooks (incl. opt-in TDD commit gating), 6 fleet-management slash commands, 3 domain subagents, swing-shift-aware statusline, and a global permission allowlist for a 30+ project portfolio.",
-      "version": "0.2.1"
+      "description": "ARETE's Claude Code automation stack — 10 security/audit hooks (incl. opt-in TDD commit gating), 6 fleet-management slash commands, and 3 domain subagents, for a 30+ project portfolio. Requires Claude Code >=2.1.0.",
+      "version": "0.2.2"
     }
   ]
 }
