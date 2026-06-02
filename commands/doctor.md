@@ -24,7 +24,7 @@ Also pipe-test the critical hooks with matching synthesized payloads:
 - `audit-bash.sh` with a safe bash payload → exit 0
 - `no-force-push.sh` with a force-push-to-main payload → exit 2 (blocks correctly)
 - `protected-paths.sh` with an SSH key path payload → exit 2
-- `detect-secrets.py` with a file-write payload containing a fake GitHub token (construct the token string at runtime via concatenation so the test source doesn't itself contain a literal token that trips the hook on this slash-command file) → exits with deny JSON
+- `detect-secrets.py` with a file-write payload containing a fake GitHub token → exits with deny JSON. The payload MUST include `"hook_event_name":"PreToolUse"` and `"tool_name":"Write"` alongside `tool_input.content` — the hook branches on `hook_event_name` and silently no-ops (exit 0, false-green) without it. Construct the token at runtime via concatenation (e.g. `ghp_` + 36 generated chars) so the test source doesn't itself contain a literal token that trips the hook on this slash-command file. Example envelope: `{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"/tmp/leak.txt","content":"GITHUB_TOKEN=<assembled-token>"}}`
 - `wrap-it-up.sh` with `{"hook_event_name":"UserPromptSubmit","prompt":"wrap it up"}` → outputs JSON containing "session-end"
 
 ### 3. Custom slash commands
