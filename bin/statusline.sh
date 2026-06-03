@@ -34,4 +34,27 @@ if [ -f /home/arete/.claude/projects/-home-arete-projects/memory/project_code_fr
     freeze=" | FREEZE-CHECK"
 fi
 
-printf '%s%s%s%s' "$project" "$git_info" "$shift_info" "$freeze"
+# Animus sync freshness — the 4h cron failed silently for 5 days (2026-05-28→06-02)
+# because failures only appended to ~/.animus/sync.log, which nobody reads. Surface
+# staleness here (renders every prompt). Warn only after >9h = 2+ missed cycles.
+sync_warn=""
+if [ -f "/home/arete/.animus/sync.FAILED" ]; then
+    # OnFailure handler dropped a marker — last systemd run errored (cleared on next success)
+    sync_warn=" | ⚠sync:FAIL"
+fi
+sync_state="/home/arete/.animus/sync_state.json"
+if [ -z "$sync_warn" ] && [ -f "$sync_state" ] && command -v jq >/dev/null 2>&1; then
+    last=$(jq -r '.last_sync // empty' "$sync_state" 2>/dev/null | cut -d. -f1)
+    if [ -n "$last" ]; then
+        last_epoch=$(date -d "$last" +%s 2>/dev/null)
+        if [ -n "$last_epoch" ]; then
+            age=$(( $(date +%s) - last_epoch ))
+            if [ "$age" -gt 32400 ]; then
+                if [ "$age" -ge 86400 ]; then age_str="$(( age / 86400 ))d"; else age_str="$(( age / 3600 ))h"; fi
+                sync_warn=" | ⚠sync:${age_str}"
+            fi
+        fi
+    fi
+fi
+
+printf '%s%s%s%s%s' "$project" "$git_info" "$shift_info" "$freeze" "$sync_warn"
