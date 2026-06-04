@@ -1,6 +1,6 @@
 {
   "name": "arete-cc-stack",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "ARETE's Claude Code automation stack — 10 security/audit hooks (incl. opt-in TDD commit gating), 6 fleet-management slash commands, and 3 domain subagents, optimized for a 30+ project portfolio. Requires Claude Code >=2.1.0.",
   "author": {
     "name": "ARETE (AreteDriver)",
