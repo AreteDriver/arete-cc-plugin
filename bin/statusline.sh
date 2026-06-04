@@ -57,4 +57,13 @@ if [ -z "$sync_warn" ] && [ -f "$sync_state" ] && command -v jq >/dev/null 2>&1;
     fi
 fi
 
-printf '%s%s%s%s%s' "$project" "$git_info" "$shift_info" "$freeze" "$sync_warn"
+# Any failed systemd --user units — generalized liveness surface. Caught 4 backup
+# units sitting silently dead in `systemctl --user --failed` for hours (2026-06-03);
+# this one check covers every current and future user unit, no per-unit wiring.
+failed_warn=""
+if command -v systemctl >/dev/null 2>&1; then
+    nf=$(systemctl --user list-units --state=failed --no-legend --plain 2>/dev/null | grep -c '\S')
+    [ "${nf:-0}" -gt 0 ] && failed_warn=" | ⚠${nf}✗units"
+fi
+
+printf '%s%s%s%s%s%s' "$project" "$git_info" "$shift_info" "$freeze" "$sync_warn" "$failed_warn"
